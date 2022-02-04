@@ -58,13 +58,97 @@ Restart=on-failure
 WantedBy=multi-user.target
 ```
 
+Перменнная окружения:
+
+```
+root@vagrant:/# ss -pnltu | grep 9100
+tcp     LISTEN   0        4096                    *:9100                *:*      users:(("node_exporter",pid=1751,fd=3))
+root@vagrant:/# cat /proc/1751/environ
+LANG=en_US.UTF-8PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/binHOME=/home/nodeusrLOGNAME=nodeusrUSER=nodeusrINVOCATION_ID=3e9068b3beb141ef8acaec481c4fbf73JOURNAL_STREAM=9:46043root@vagrant:/#
+```
+
+
+
 (2)
 
+CPU:
+
+`curl http://localhost:9100/metrics | grep node_ | grep cpu`
+
+```
+# TYPE node_cpu_guest_seconds_total counter
+node_cpu_guest_seconds_total{cpu="0",mode="nice"} 0
+node_cpu_guest_seconds_total{cpu="0",mode="user"} 0
+node_cpu_guest_seconds_total{cpu="1",mode="nice"} 0
+node_cpu_guest_seconds_total{cpu="1",mode="user"} 0
+# HELP node_cpu_seconds_total Seconds the CPUs spent in each mode.
+# TYPE node_cpu_seconds_total counter
+node_cpu_seconds_total{cpu="0",mode="idle"} 20136.19
+node_cpu_seconds_total{cpu="0",mode="iowait"} 13.79
+node_cpu_seconds_total{cpu="0",mode="irq"} 0
+node_cpu_seconds_total{cpu="0",mode="nice"} 0.23
+node_cpu_seconds_total{cpu="0",mode="softirq"} 3.48
+node_cpu_seconds_total{cpu="0",mode="steal"} 0
+node_cpu_seconds_total{cpu="0",mode="system"} 39.89
+node_cpu_seconds_total{cpu="0",mode="user"} 34.6
+node_cpu_seconds_total{cpu="1",mode="idle"} 20133.64
+node_cpu_seconds_total{cpu="1",mode="iowait"} 13.02
+node_cpu_seconds_total{cpu="1",mode="irq"} 0
+node_cpu_seconds_total{cpu="1",mode="nice"} 0.08
+node_cpu_seconds_total{cpu="1",mode="softirq"} 4.12
+node_cpu_seconds_total{cpu="1",mode="steal"} 0
+node_cpu_seconds_total{cpu="1",mode="system"} 37.64
+node_cpu_seconds_total{cpu="1",mode="user"} 32.5
+```
+
+Memory:
+
+```
+# TYPE node_memory_MemAvailable_bytes gauge
+node_memory_MemAvailable_bytes 7.18544896e+08
+# TYPE node_memory_MemFree_bytes gauge
+node_memory_MemFree_bytes 2.29728256e+08
+```
+
+Disk:
+
+```
+# TYPE node_disk_io_time_seconds_total counter
+node_disk_io_time_seconds_total{device="dm-0"} 59.648
+node_disk_io_time_seconds_total{device="sda"} 59.896
+# HELP node_disk_read_time_seconds_total The total number of seconds spent by all reads.
+# TYPE node_disk_read_time_seconds_total counter
+node_disk_read_time_seconds_total{device="dm-0"} 26.964000000000002
+node_disk_read_time_seconds_total{device="sda"} 18.655
+# TYPE node_disk_read_bytes_total counter
+node_disk_read_bytes_total{device="dm-0"} 3.86343936e+08
+node_disk_read_bytes_total{device="sda"} 3.95819008e+08
+# TYPE node_disk_write_time_seconds_total counter
+node_disk_write_time_seconds_total{device="dm-0"} 118.372
+node_disk_write_time_seconds_total{device="sda"} 113.619
+```
+
+Network:
+
+```
+# TYPE node_network_receive_errs_total counter
+node_network_receive_errs_total{device="eth0"} 0
+node_network_receive_errs_total{device="lo"} 0
+# TYPE node_network_receive_bytes_total counter
+node_network_receive_bytes_total{device="eth0"} 1.1066699e+07
+node_network_receive_bytes_total{device="lo"} 702148
+# TYPE node_network_transmit_bytes_total counter
+100 61254    0 61254    0     0  3987k      0 --:--:-- --:--:-- --:--:-- 3987k
+node_network_transmit_bytes_total{device="eth0"} 652794
+node_network_transmit_bytes_total{device="lo"} 765678
+# TYPE node_network_transmit_errs_total counter
+node_network_transmit_errs_total{device="eth0"} 0
+node_network_transmit_errs_total{device="lo"} 0
+```
 
 (3)
 
 ![2.jpg](./assets/2.jpg)
-
 
 (4)
 
@@ -80,7 +164,7 @@ root@vagrant:~# dmesg |grep -i virtual
 
 (5)
 
-Лимит на количество открытых дескрипторов. 
+Лимит на количество открытых дескрипторов.
 
 ```
 root@vagrant:~# /sbin/sysctl -n fs.nr_open
@@ -100,13 +184,13 @@ root@vagrant:~# unshare -f --pid --mount-proc sleep 5m
 Во втором терминале:
 
 ```
-root@vagrant:~# ps -e | grep sleep                                             
-   1559 pts/0    00:00:00 sleep                                                
+root@vagrant:~# ps -e | grep sleep                                           
+   1559 pts/0    00:00:00 sleep                                              
 root@vagrant:~# nsenter --target 1559 --mount --uts --ipc --net --pid ps aux   
-USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND     
-root           1  0.0  0.0   5476   596 pts/0    S+   16:39   0:00 sleep 5m    
-root           2  0.0  0.3   8892  3364 pts/1    R+   16:41   0:00 ps aux      
-root@vagrant:~#                                                                
+USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND   
+root           1  0.0  0.0   5476   596 pts/0    S+   16:39   0:00 sleep 5m  
+root           2  0.0  0.3   8892  3364 pts/1    R+   16:41   0:00 ps aux    
+root@vagrant:~#                                                              
 ```
 
 (7)
